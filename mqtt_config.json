@@ -1,0 +1,11 @@
+{
+  "broker": "YOUR.IP.ADDRESS",
+  "client_user": "YOUR_CLIENT_USER",
+  "client_pass": "YOUR_CLIENT_PASS",
+  "brokerport": "YOUR_BROKER_PORT",
+  "client_id": "YOUR_CLIENT_ID",
+  "sub_topic": "NONE",
+  "pub_topic": "YOUR_PUB_TOPIC",
+  "pub_status": "YOUR_SENSOR_STATUS_TOPIC",
+  "keepalive": 60
+}
