@@ -8,7 +8,7 @@ import mqtt_config_data
 from mqtt import MQTTClient
 
 #import esp
-#print(esp.flash_id()) 
+#print(esp.flash_id()) #1458415
 
 gc.collect()
 
@@ -174,6 +174,8 @@ while True:
         
         #mqtt_client.publish(topic=my_pub_status, msg=b"AVLB", retain=False)
         gas_value = gas.value()
+        if gas_value is None:
+            gas_value = 1
         if gas_value == 0:
             gas_status = "ON" # When 0 is readed then there is a gas leaking
         if gas_value == 1:
