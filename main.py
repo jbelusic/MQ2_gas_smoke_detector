@@ -154,6 +154,11 @@ for i in range(20, 0, -1):
 #if gas.value() == 0:
 #    mqtt_client.publish(topic=my_pub_status, msg="ON", retain=True)
 
+#******************* Logging *************************#
+def log_data(p_value):
+    with open("log.txt","a") as file:
+        file.write("{}".format(p_value)+"\n")
+
 # ########################### MAIN LOOP ###################################
 cnt = 0
 is_connected = True
@@ -162,48 +167,51 @@ gas_value = 1
 gas_status = "OFF"
 print("")
 print("Main LOOP...")
+
 while True:
-  cnt += 1
-  try:
-    if gc.mem_free() < 102000:
-      gc.collect()
-
+    cnt += 1
     try:
-        mqtt_client.check_msg()
-        mqtt_client.ping()
-        
-        #mqtt_client.publish(topic=my_pub_status, msg=b"AVLB", retain=False)
-        gas_value = gas.value()
-        if gas_value is None:
-            gas_value = 1
-        if gas_value == 0:
-            gas_status = "ON" # When 0 is readed then there is a gas leaking
-        if gas_value == 1:
-            gas_status = "OFF"
-        #print(gas_status)
-        #print("last_reading_value",last_reading_value,"gas_value",gas_value)
-        if last_reading_value != gas_value:
-            print("Gas or smoke", gas_status)
-            mqtt_client.publish(topic=my_pub_status, msg=gas_status, retain=True)
-            #last_reading_value = gas_value
-        #mqtt_client.publish(topic=my_pub_status, msg=gas_status, retain=True)
-        last_reading_value = gas_value    
-    except Exception as e:
-        print("Error reading gas status,",str(e))
-        if "Errno 104" in str(e) or "Errno 103" in str(e):
-            is_connected = False
-            print("Broker is unavailable, trying to connect to broker...")
-            is_connected, mqtt_client = mqtt_reconnect(mqtt_client)
-        
-    sleep(1)
-    
-  except OSError as e:
-    print("General error", str(e))
-    pass
+        if gc.mem_free() < 102000:
+            gc.collect()
 
+        try:
+            mqtt_client.check_msg()
+            mqtt_client.ping()
+            
+            #mqtt_client.publish(topic=my_pub_status, msg=b"AVLB", retain=False)
+            gas_value = gas.value()
+            if gas_value is None:
+                gas_value = 1
+            if gas_value == 0:
+                gas_status = "ON" # When 0 is readed then there is a gas leaking
+            if gas_value == 1:
+                gas_status = "OFF"
+            #print(gas_status)
+            #print("last_reading_value",last_reading_value,"gas_value",gas_value)
+            if last_reading_value != gas_value:
+                print("Gas or smoke", gas_status)
+                mqtt_client.publish(topic=my_pub_status, msg=gas_status, retain=True)
+                #last_reading_value = gas_value
+            #mqtt_client.publish(topic=my_pub_status, msg=gas_status, retain=True)
+            last_reading_value = gas_value    
+        except Exception as e:
+            print("Error reading gas status,",str(e))
+            if "Errno 104" in str(e) or "Errno 103" in str(e) or cnt%10 == 0:
+                is_connected = False
+                print("Broker is unavailable, trying to connect to broker...")
+                is_connected, mqtt_client = mqtt_reconnect(mqtt_client)
+            #log_data("Error reading gas status: "+str(e))
+
+    except OSError as e:
+        print("General error", str(e))
+        log_data("General error: "+str(e))
+    
 try:
   mqtt_client.disconnect()
-except:
+  log_data("Client disconnected!")
+except Exception as e:
   print("Problem disconnecting client on program end")
+  log_data("Problem disconnecting client on program end: "+str(e))
 
 print("End program!")
+log_data("End program!")
